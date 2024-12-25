@@ -1,5 +1,5 @@
 "use client"
-import React, { Children, useState } from 'react'
+import React, { Children, use, useState } from 'react'
 import {
     Dialog,
     DialogContent,
@@ -14,11 +14,16 @@ import { Button } from '@/components/ui/button'
 import { useMutation } from 'convex/react'
 import { api } from '@/convex/_generated/api'
 import { Loader2 } from 'lucide-react'
+import uuid4 from 'uuid4'
+import { useUser } from '@clerk/nextjs'
   
 function UploadPdfDialog({children}) {
     const generateUploadUrl=useMutation(api.fileStorage.generateUploadUrl);
+    const AddFileEntryToDb = useMutation(api.fileStorage.AddFileEntryToDb);
+    const {user} = useUser();
+    const [fileName , setFileName] = useState('');
     const [file , setFile] = useState();
-
+    const getFileUrl = useMutation(api.fileStorage.getFileUrl)
     const [loading , setLoading] = useState(false);
     const OnFileSelect=(event)=>{  
         setFile(event.target.files[0]);
@@ -26,21 +31,45 @@ function UploadPdfDialog({children}) {
 
     const OnUpload=async()=>{
         setLoading(true);
+        try {
+            // Step 1: Get a short-lived upload URL
+            const postUrl = await generateUploadUrl();
+            // Step 2: POST the file to the URL
+            const result = await fetch(postUrl, {
+                method: "POST",
+                headers: { "Content-Type": file?.type },
+                body: file,
+            });
+            const { storageId } = await result.json();
+            console.log('StorageId', storageId);
+            const fileId =  uuid4();
+            const fileUrl = await getFileUrl({storageId:storageId});
+            // Step 3
+            const resp = await AddFileEntryToDb({
+                fileId:fileId, 
+                storageId:storageId,
+                fileName:fileName || 'Untitled File', 
+                fileUrl:fileUrl,
+                createdBy:user?.primaryEmailAddress?.emailAddress
+            });
+            console.log(resp);
 
-         // Step 1: Get a short-lived upload URL
-         const postUrl = await generateUploadUrl();
-         // Step 2: POST the file to the URL
-         const result = await fetch(postUrl, {
-             method: "POST",
-            headers: { "Content-Type": file?.type },
-            body: file,
-        });
-         const { storageId } = await result.json();
-        console.log('StorageId', storageId);
+            //api call to fetch pdf process data
+            const ApiResp = await axios.get('/api/pdf-loader');
+            console.log(ApiResp.data.result);
+            
 
 
-        setLoading(false);
 
+
+
+
+
+        } catch (error) {
+            console.error("Upload failed:", error);
+        } finally {
+            setLoading(false);
+        }
     }
 
 
@@ -68,6 +97,7 @@ function UploadPdfDialog({children}) {
                 <label className="text-sm font-medium">File Name *</label>
                 <input 
                   placeholder="File Name"
+                  onChange={(e)=>setFileName(e.target.value)}
                   className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                 />
               </div>
