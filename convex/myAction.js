@@ -17,8 +17,8 @@ export const ingest = action({
     //   ["Hello world", "Bye bye", "What's this?"],
 
     //   [{ prop: 2 }, { prop: 1 }, { prop: 3 }],
-      new GoogleGenerativeAIEmbeddings({
-        apiKey :' AIzaSyDjwXlla2d3XHBqIz9UfaIrHJgga9TZc5g',
+    new GoogleGenerativeAIEmbeddings({
+        apiKey: process.env.GOOGLE_API_KEY, // Use environment variable
         model: "text-embedding-004", // 768 dimensions
         taskType: TaskType.RETRIEVAL_DOCUMENT,
         title: "Document title",
