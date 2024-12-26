@@ -11,7 +11,7 @@ import {
   } from "@/components/ui/dialog"
 import { DialogClose } from '@radix-ui/react-dialog'
 import { Button } from '@/components/ui/button'
-import { useMutation } from 'convex/react'
+import { useAction, useMutation } from 'convex/react'
 import { api } from '@/convex/_generated/api'
 import { Loader2 } from 'lucide-react'
 import uuid4 from 'uuid4'
@@ -20,6 +20,7 @@ import { useUser } from '@clerk/nextjs'
 function UploadPdfDialog({children}) {
     const generateUploadUrl=useMutation(api.fileStorage.generateUploadUrl);
     const AddFileEntryToDb = useMutation(api.fileStorage.AddFileEntryToDb);
+   const embeddingDocument = useAction(api.myAction.ingest)
     const {user} = useUser();
     const [fileName , setFileName] = useState('');
     const [file , setFile] = useState();
@@ -52,12 +53,17 @@ function UploadPdfDialog({children}) {
                 fileUrl:fileUrl,
                 createdBy:user?.primaryEmailAddress?.emailAddress
             });
-            console.log(resp);
+            // console.log(resp);
 
             //api call to fetch pdf process data
-            const ApiResp = await axios.get('/api/pdf-loader');
+            const ApiResp = await axios.get('/api/pdf-loader?pdfUrl='+fileUrl);
             console.log(ApiResp.data.result);
-            
+            // const embeddingResult= embeddingDocument({
+            //   splitText:ApiResp.data.result,
+            //   fieldId : '123'
+            // });
+            // console.log(embeddingResult)
+             
 
 
 

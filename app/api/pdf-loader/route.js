@@ -1,11 +1,15 @@
 import { NextResponse   } from "next/server";
 import { WebPDFLoader } from "@langchain/community/document_loaders/web/pdf";
 import {RecursiveCharacterTextSplitter} from "langchain/text_splitter"
-const pdfUrl = "https://clear-grouse-373.convex.cloud/api/storage/c8331ed2-77f9-4a8b-a4f5-cc506d0c7fd4"
+// const pdfUrl = "https://clear-grouse-373.convex.cloud/api/storage/c8331ed2-77f9-4a8b-a4f5-cc506d0c7fd4"
 export async function GET(req){
     try {
         // Load   
+        const reqUrl = req.url;
+        const { searchParams} =  new URL(reqUrl);
+        const pdfUrl = searchParams.get('pdfUrl')
         const response = await fetch(pdfUrl);
+        console.log(pdfUrl);
         
         // Check if the response is OK
         if (!response.ok) {
