@@ -1,12 +1,14 @@
+"use client"
+import { UserButton } from '@clerk/nextjs'
 import Image from 'next/image'
 import React from 'react'
 
-function WorkspaceHeader() {
+export default function WorkspaceHeader() {
   return (
-    <div>
-        <Image src={'../../../public/logo.svg'} alt ='logo' width={180} height={100}/>
+    <div className='p-4 flex justify-between shadow-md'>
+        <Image src={'/logo.svg'} alt='logo' width={140} height={100}/>
+        <UserButton/>
     </div>
   )
 }
 
-export default WorkspaceHeader
