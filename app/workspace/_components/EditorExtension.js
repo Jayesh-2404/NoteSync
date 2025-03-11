@@ -15,34 +15,38 @@ import {
 } from 'lucide-react'
 
 function EditorExtension({editor}) {
+  //set the url to take the input 
   const [showLinkInput, setShowLinkInput] = useState(false);
-
-  if (!editor) {
-    return null;
-  }
+  const [linkUrl, setLinkUrl] = useState('');
 
   const setLink = useCallback(() => {
-    const previousUrl = editor.getAttributes('link').href
-    const url = window.prompt('URL', previousUrl)
+    const previousUrl = editor?.getAttributes('link').href;
+    const url = window.prompt('URL', previousUrl);
+
+    if (!editor) return;
 
     // cancelled
     if (url === null) {
-      return
+      return;
     }
 
     // empty
     if (url === '') {
-      editor.chain().focus().extendMarkRange('link').unsetLink().run()
-      return
+      editor.chain().focus().extendMarkRange('link').unsetLink().run();
+      return;
     }
 
     // update link
     try {
-      editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run()
+      editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run();
     } catch (e) {
-      alert(e.message)
+      alert(e.message);
     }
-  }, [editor])
+  }, [editor]);
+
+  if (!editor) {
+    return null;
+  }
 
   return (
     <div className='p-5 border-b'>

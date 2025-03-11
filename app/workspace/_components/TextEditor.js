@@ -17,7 +17,7 @@ function TextEditor() {
             Underline,
             Highlight.configure({ multicolor: true }),
             Link.configure({
-                openOnClick: false, // Prevents links from opening when clicked in the editor
+                openOnClick: false, 
                 HTMLAttributes: {
                     class: 'text-blue-500 underline hover:text-blue-700'
                 }
