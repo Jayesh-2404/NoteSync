@@ -11,13 +11,19 @@ import {
   List,
   X,
   Link as LinkIcon,
-  LinkOff
+  LinkOff,
+  Sparkle,
+  Sparkles
 } from 'lucide-react'
+import { useParams } from 'next/navigation';
+import { useAction } from 'convex/react';
+import { api } from '@/convex/_generated/api';
 
 function EditorExtension({editor}) {
-  //set the url to take the input 
+  const { fileId } = useParams();
   const [showLinkInput, setShowLinkInput] = useState(false);
   const [linkUrl, setLinkUrl] = useState('');
+  const SearchAi = useAction(api.myAction.search);
 
   const setLink = useCallback(() => {
     const previousUrl = editor?.getAttributes('link').href;
@@ -43,6 +49,58 @@ function EditorExtension({editor}) {
       alert(e.message);
     }
   }, [editor]);
+
+  const onAiClick = async () => {
+    try {
+      if (!editor) {
+        console.error("Editor not initialized");
+        return;
+      }
+  
+      const selectedtext = editor.state.doc.textBetween(
+        editor.state.selection.from,
+        editor.state.selection.to,
+        ''
+      );
+  
+      if (!selectedtext || selectedtext.trim() === '') {
+        alert("Please select some text first");
+        return;
+      }
+  
+      console.log("Searching with:", { selectedtext, fileId });
+  
+      const result = await SearchAi({
+        query: selectedtext,
+        fileId: fileId
+      });
+  
+      // Add error checking for result
+      if (!result) {
+        console.log("No results returned from search");
+        alert("No results found");
+        return;
+      }
+  
+      try {
+        const parsedResult = JSON.parse(result);
+        console.log("Parsed result:", parsedResult);
+  
+        if (parsedResult && parsedResult.length > 0) {
+          editor.chain().focus().insertContent(parsedResult[0].pageContent).run();
+        } else {
+          alert("No relevant results found");
+        }
+      } catch (parseError) {
+        console.error("Error parsing result:", parseError);
+        alert("Error processing search results");
+      }
+  
+    } catch (error) {
+      console.error("AI Search error:", error);
+      alert("Error performing AI search");
+    }
+  };
 
   if (!editor) {
     return null;
@@ -179,7 +237,16 @@ function EditorExtension({editor}) {
             >
               <LinkOff size={20}/>
             </button>
+            
           )}
+          <div className="flex gap-1">
+          <button
+            onClick={() => onAiClick()}
+            className={` hover:bg-gray-100`}
+          >
+            <Sparkles size={20}/>
+          </button>
+        </div>
         </div>
       </div>
     </div>
