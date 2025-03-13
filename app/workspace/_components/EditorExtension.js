@@ -1,10 +1,11 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback } from 'react';
 import {
   Bold, Italic, Heading1, Heading2, Heading3, Code, Underline, Highlighter, List, X, Link as LinkIcon, LinkOff, Sparkles
 } from 'lucide-react';
 import { useParams } from 'next/navigation';
 import { useAction } from 'convex/react';
 import { api } from '@/convex/_generated/api';
+import chatSession from '../../../configs/AIModel'; // Correct import path
 
 function EditorExtension({ editor }) {
   const { fileId } = useParams();
@@ -14,7 +15,7 @@ function EditorExtension({ editor }) {
     if (!editor) return;
 
     const previousUrl = editor.getAttributes('link').href;
-    const url = window.prompt('URL', previousUrl);
+    const url = window.prompt('Enter URL', previousUrl);
 
     if (url === null) return; // Cancelled
 
@@ -28,21 +29,38 @@ function EditorExtension({ editor }) {
 
   const onAiClick = useCallback(async () => {
     if (!editor) return;
-  
+
     const selectedText = editor.state.doc.textBetween(
       editor.state.selection.from,
       editor.state.selection.to,
       "  "
     );
-  
+
     if (!selectedText) {
       alert("Please select some text first");
       return;
     }
-  
+
     try {
       const result = await SearchAI({ query: selectedText, fileId });
       console.log("AI Response:", result);
+
+      const UnformattedAns = JSON.parse(result);
+      let AllUnformattedAns = ' ';
+      UnformattedAns && UnformattedAns.forEach(item => {
+        AllUnformattedAns += item.pageContent;
+      });
+
+      const PROMPT = `For the question: "${selectedText}", please provide a detailed and well-formatted answer in HTML. The answer should be based on the following content: ${AllUnformattedAns}. Ensure the response is clear, concise, and properly structured.`;
+
+      const AiModelResult = await chatSession.sendMessage(PROMPT);
+      const FinalAns = (await AiModelResult.response.text()).replace(/```/g, '').replace(/html/g, '').trim();
+
+      // Format the answer as a single paragraph
+      const formattedAnswer = FinalAns.replace(/\n+/g, ' ');
+
+      // Insert the AI response into the editor
+      editor.chain().focus().insertContentAt(editor.state.selection.to, `<p><strong>Answer:</strong> ${formattedAnswer}</p><hr>`).run();
     } catch (error) {
       console.error("AI request failed:", error);
       alert("Failed to process AI request");

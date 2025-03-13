@@ -1,11 +1,11 @@
+// filepath: d:\Fun_Projects\Ai-pdf-notes-taker\app\workspace\[fileId]\page.js
 "use client"
 import { useParams } from 'next/navigation'
 import React from 'react'
 import WorkspaceHeader from '../_components/Workspace';
 import PdfViewer from '../_components/PdfViewer';
 import { api } from '@/convex/_generated/api';
-// import { query ,  } from '@/convex/_generated/server';
-import {useQuery} from 'convex/react'
+import { useQuery } from 'convex/react'
 import { useEffect } from 'react';
 import TextEditor from '../_components/TextEditor';
 import {
@@ -23,7 +23,7 @@ function ResizeHandle() {
 }
 
 function Workspace() {
-    const {fileId} = useParams();
+    const { fileId } = useParams();
     const fileInfo = useQuery(api.fileStorage.GetFileRecord, {
       fileId: fileId
     });

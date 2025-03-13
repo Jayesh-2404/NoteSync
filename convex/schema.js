@@ -24,4 +24,8 @@ export default defineSchema({
     imageUrl: v.string(),
     userName: v.string(),
   }),
+  notes: defineTable({
+    fileId: v.string(),
+    content: v.string(),
+  }),
 });

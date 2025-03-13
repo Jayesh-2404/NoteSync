@@ -1,44 +1,74 @@
-import React from 'react'
-import { useEditor, EditorContent } from '@tiptap/react'
-import StarterKit from '@tiptap/starter-kit'
-import Placeholder from '@tiptap/extension-placeholder'
-import Underline from '@tiptap/extension-underline'
-import Highlight from '@tiptap/extension-highlight'
-import Link from '@tiptap/extension-link'
-import EditorExtension from './EditorExtension'
+import React, { useEffect } from 'react';
+import { useEditor, EditorContent } from '@tiptap/react';
+import StarterKit from '@tiptap/starter-kit';
+import Placeholder from '@tiptap/extension-placeholder';
+import Underline from '@tiptap/extension-underline';
+import Highlight from '@tiptap/extension-highlight';
+import Link from '@tiptap/extension-link';
+import EditorExtension from './EditorExtension';
+import { useAction } from 'convex/react';
+import { api } from '@/convex/_generated/api';
+import { useParams } from 'next/navigation';
 
 function TextEditor() {
-    const editor = useEditor({
-        extensions: [
-            StarterKit,
-            Placeholder.configure({
-                placeholder:'Start taking your notes here .... '
-            }),
-            Underline,
-            Highlight.configure({ multicolor: true }),
-            Link.configure({
-                openOnClick: false, 
-                HTMLAttributes: {
-                    class: 'text-blue-500 underline hover:text-blue-700'
-                }
-            })
-        ],
-        content: '',
-        editorProps: {
-            attributes: {
-                class: 'focus:outline-none h-screen p-5'
-            }
-        }
-    })
+  const { fileId } = useParams();
+  const saveNote = useAction(api.notes.saveNote);
+  const loadNote = useAction(api.notes.loadNote);
 
-    return (
-        <div>
-            <EditorExtension editor={editor}/>
-            <div>
-                <EditorContent editor={editor} />  
-            </div>
-        </div>
-    )
+  const editor = useEditor({
+    extensions: [
+      StarterKit,
+      Placeholder.configure({
+        placeholder: 'Start taking your notes here .... '
+      }),
+      Underline,
+      Highlight.configure({ multicolor: true }),
+      Link.configure({
+        openOnClick: false,
+        HTMLAttributes: {
+          class: 'text-blue-500 underline hover:text-blue-700'
+        }
+      })
+    ],
+    content: '',
+    editorProps: {
+      attributes: {
+        class: 'focus:outline-none h-full p-5 overflow-y-auto'
+      }
+    }
+  });
+
+  useEffect(() => {
+    const loadSavedNote = async () => {
+      const content = await loadNote({ fileId });
+      editor?.commands.setContent(content);
+    };
+
+    if (editor) {
+      loadSavedNote();
+    }
+  }, [editor, fileId, loadNote]);
+
+  const handleSave = async () => {
+    const content = editor.getHTML();
+    await saveNote({
+      fileId,
+      content,
+    });
+    alert("Note saved");
+  };
+
+  return (
+    <div className="h-full flex flex-col">
+      <EditorExtension editor={editor} />
+      <div className="flex-1 overflow-y-auto">
+        <EditorContent editor={editor} />
+      </div>
+      <button onClick={handleSave} className="p-2 rounded bg-blue-500 text-white hover:bg-blue-600">
+        Save
+      </button>
+    </div>
+  );
 }
 
-export default TextEditor
+export default TextEditor;
