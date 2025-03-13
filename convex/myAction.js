@@ -5,23 +5,24 @@ import { api } from "./_generated/api.js";
 import { TaskType } from "@google/generative-ai";
 import { v } from 'convex/values';
 
-const GOOGLE_API_KEY = ""; // Remove extra spaces
-
 export const ingest = action({
   args: {
     splitText: v.any(),
     fileId: v.string(),
   },
   handler: async (ctx, args) => {
+    console.log("Split Text:", args.splitText); // Log the input text
+    console.log("Metadata:", { fileId: args.fileId }); // Log the metadata
+
     const metadata = {
-      fileId: args.fileId
+      fileId: args.fileId,
     };
 
     await ConvexVectorStore.fromTexts(
       args.splitText,
       metadata,
       new GoogleGenerativeAIEmbeddings({
-        apiKey: GOOGLE_API_KEY, // Use the constant
+        apiKey: "AIzaSyAqQ7_uUxakDiicd9W87wH1aW-R_3aoj14",
         model: "text-embedding-004",
         taskType: TaskType.RETRIEVAL_DOCUMENT,
         title: "Document title",
@@ -29,10 +30,9 @@ export const ingest = action({
       { ctx }
     );
 
-    // Update document structure to match schema
     const document = {
       embedding: args.splitText,
-      metadata: metadata, // Store metadata object
+      metadata: metadata,
       text: args.splitText,
     };
     await ctx.db.insert("documents", document);
@@ -44,12 +44,12 @@ export const ingest = action({
 export const search = action({
   args: {
     query: v.string(),
-    fileId: v.string()
+    fileId: v.string(),
   },
   handler: async (ctx, args) => {
     const vectorStore = new ConvexVectorStore(
       new GoogleGenerativeAIEmbeddings({
-        apiKey: GOOGLE_API_KEY, // Use the constant
+        apiKey: 'AIzaSyAqQ7_uUxakDiicd9W87wH1aW-R_3aoj14',
         model: "text-embedding-004",
         taskType: TaskType.RETRIEVAL_DOCUMENT,
         title: "Document title",
@@ -57,17 +57,14 @@ export const search = action({
       { ctx }
     );
 
-    try {
-      const results = await vectorStore.similaritySearch(args.query, 1);
-      console.log("Raw results:", results); // Add logging for debugging
+    const results = await vectorStore.similaritySearch(args.query, 1);
 
-      const filteredResults = results.filter(q => q.metadata.fileId === args.fileId);
-      console.log("Filtered results:", filteredResults);
-      
-      return JSON.stringify(filteredResults);
-    } catch (error) {
-      console.error("Search error:", error);
-      throw error;
+    const resultOne = results.filter((q) => q.metadata.fileId === args.fileId);
+
+    if (resultOne.length === 0) {
+      return "No matching documents found.";
     }
+
+    return JSON.stringify(resultOne);
   },
 });
