@@ -8,6 +8,11 @@ export async function GET(req){
         const reqUrl = req.url;
         const { searchParams} =  new URL(reqUrl);
         const pdfUrl = searchParams.get('pdfUrl')
+
+        if (!pdfUrl) {
+            throw new Error("pdfUrl parameter is required.");
+        }
+
         const response = await fetch(pdfUrl);
         console.log(pdfUrl);
         

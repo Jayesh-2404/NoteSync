@@ -6,6 +6,7 @@ import { useUser } from "@clerk/nextjs";
 import { useEffect } from "react";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
+import LandingPage from "@/components/landing/landing";
 
 export default function Home() {
 
@@ -31,10 +32,11 @@ export default function Home() {
 
   return (
     <div >
-      <Button>
+      {/* <Button>
         hello
-      </Button>
+      </Button> */}
       <UserButton />
+      <LandingPage/>
     </div>
   );
 }

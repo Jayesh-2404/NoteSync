@@ -1,5 +1,5 @@
 "use client"
-import React, { Children, use, useState } from 'react'
+import React, { useState } from 'react'
 import {
     Dialog,
     DialogContent,
@@ -16,60 +16,78 @@ import { api } from '@/convex/_generated/api'
 import { Loader2 } from 'lucide-react'
 import uuid4 from 'uuid4'
 import { useUser } from '@clerk/nextjs'
-  
-function UploadPdfDialog({children}) {
-    const generateUploadUrl=useMutation(api.fileStorage.generateUploadUrl);
+import axios from 'axios'; // Import axios
+
+function UploadPdfDialog({ children }) {
+    const generateUploadUrl = useMutation(api.fileStorage.generateUploadUrl);
     const AddFileEntryToDb = useMutation(api.fileStorage.AddFileEntryToDb);
-   const embeddingDocument = useAction(api.myAction.ingest)
-    const {user} = useUser();
-    const [fileName , setFileName] = useState('');
-    const [file , setFile] = useState();
+    const embeddDocument = useAction(api.myAction.ingest)
+    const { user } = useUser();
+    const [fileName, setFileName] = useState('');
+    const [file, setFile] = useState();
     const getFileUrl = useMutation(api.fileStorage.getFileUrl)
-    const [loading , setLoading] = useState(false);
-    const OnFileSelect=(event)=>{  
+    const [loading, setLoading] = useState(false);
+    const OnFileSelect = (event) => {  
         setFile(event.target.files[0]);
     }
+    // ...rest of the code
+
 
     const OnUpload=async()=>{
         setLoading(true);
         try {
             // Step 1: Get a short-lived upload URL
             const postUrl = await generateUploadUrl();
+            
             // Step 2: POST the file to the URL
             const result = await fetch(postUrl, {
                 method: "POST",
                 headers: { "Content-Type": file?.type },
                 body: file,
             });
+
+            // Check if the upload was successful
+            if (!result.ok) {
+                throw new Error('File upload failed');
+            }
+
             const { storageId } = await result.json();
-            console.log('StorageId', storageId);
-            const fileId =  uuid4();
-            const fileUrl = await getFileUrl({storageId:storageId});
+            
+            // Check if storageId is valid
+            if (!storageId) {
+                throw new Error('No storageId returned from upload');
+            }
+
+            const fileId = uuid4();
+            const fileUrl = await getFileUrl({ storageId: storageId });
+
             // Step 3
             const resp = await AddFileEntryToDb({
-                fileId:fileId, 
-                storageId:storageId,
-                fileName:fileName || 'Untitled File', 
-                fileUrl:fileUrl,
-                createdBy:user?.primaryEmailAddress?.emailAddress
+                fileId: fileId,
+                storageId: storageId,
+                fileName: fileName || 'Untitled File',
+                fileUrl: fileUrl,
+                createdBy: user?.primaryEmailAddress?.emailAddress
             });
-            // console.log(resp);
 
-            //api call to fetch pdf process data
-            const ApiResp = await axios.get('/api/pdf-loader?pdfUrl='+fileUrl);
-            console.log(ApiResp.data.result);
-            // const embeddingResult= embeddingDocument({
-            //   splitText:ApiResp.data.result,
-            //   fieldId : '123'
-            // });
-            // console.log(embeddingResult)
-             
+            // Fetch API call to fetch PDF process data
+            try {
+                const response = await fetch('/api/pdf-loader?pdfurl=' + fileUrl);
+                if (!response.ok) {
+                    throw new Error('Network response was not ok ' + response.statusText);
+                }
+                const ApiResp = await response.json();
+                console.log(ApiResp.result);
 
-
-
-
-
-
+                await embeddDocument({
+                    splitText: ApiResp.result,
+                    fileId: fileId
+                });
+            } catch (error) {
+                console.error("Fetch failed:", error);
+            } finally {
+                setLoading(false);
+            }
 
         } catch (error) {
             console.error("Upload failed:", error);
