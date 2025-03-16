@@ -23,9 +23,9 @@ function ResizeHandle() {
 }
 
 function Workspace() {
-    const { fileId } = useParams();
+    const { fileid } = useParams();
     const fileInfo = useQuery(api.fileStorage.GetFileRecord, {
-      fileId: fileId
+      fileId: fileid  // pass the dynamic param correctly
     });
 
     useEffect(() => {
