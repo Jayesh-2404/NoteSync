@@ -11,8 +11,7 @@ import { api } from '@/convex/_generated/api';
 import { useParams } from 'next/navigation';
 
 function TextEditor() {
-  const { fileId } = useParams();
-  const saveNote = useAction(api.notes.saveNote);
+  const { fileid } = useParams(); // Ensure this matches the URL parameter name
   const loadNote = useAction(api.notes.loadNote);
 
   const editor = useEditor({
@@ -40,23 +39,14 @@ function TextEditor() {
 
   useEffect(() => {
     const loadSavedNote = async () => {
-      const content = await loadNote({ fileId });
+      const content = await loadNote({ fileId: fileid });
       editor?.commands.setContent(content);
     };
 
     if (editor) {
       loadSavedNote();
     }
-  }, [editor, fileId, loadNote]);
-
-  const handleSave = async () => {
-    const content = editor.getHTML();
-    await saveNote({
-      fileId,
-      content,
-    });
-    alert("Note saved");
-  };
+  }, [editor, fileid, loadNote]);
 
   return (
     <div className="h-full flex flex-col">
@@ -64,9 +54,6 @@ function TextEditor() {
       <div className="flex-1 overflow-y-auto">
         <EditorContent editor={editor} />
       </div>
-      <button onClick={handleSave} className="p-2 rounded bg-blue-500 text-white hover:bg-blue-600">
-        Save
-      </button>
     </div>
   );
 }

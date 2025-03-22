@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React from 'react';
 import {
   Bold,
   Italic,
@@ -21,7 +21,7 @@ import chatSession from '../../../configs/AIModel';
 import { useUser } from '@clerk/nextjs';
 
 function EditorExtension({ editor }) {
-  const { fileId } = useParams();
+  const { fileid } = useParams(); // Ensure this matches the URL parameter name
   const SearchAI = useAction(api.myAction.search);
   const SaveNotes = useMutation(api.notes.AddNotes);
   const { user } = useUser();
@@ -38,40 +38,52 @@ function EditorExtension({ editor }) {
       return;
     }
   
-    // Call your search action
-    const result = await SearchAI({ query: selectedText, fileId });
-    const UnformattedAns = JSON.parse(result);
-    let AllUnformattedAns = '';
-    UnformattedAns && UnformattedAns.forEach(item => {
-      AllUnformattedAns += item.pageContent;
-    });
+    if (!fileid) {
+      console.error("fileId is missing");
+      return;
+    }
   
-    const PROMPT = `For the question: "${selectedText}", please provide a detailed and well-formatted answer in HTML. The answer should be based on the following content: ${AllUnformattedAns}. Ensure the response is clear, concise, and properly structured.`;
-  
-    const AiModelResult = await chatSession.sendMessage(PROMPT);
-    const responseText = await AiModelResult.response.text();
-    console.log("Raw AI Response:", responseText);
-    const FinalAns = responseText.replace(/```/g, '').replace(/html/g, '').trim();
+    try {
+      // Call your search action
+      const result = await SearchAI({ query: selectedText, fileId: fileid });
+      if (!Array.isArray(result)) {
+        throw new Error("Expected an array of texts");
+      }
+      const UnformattedAns = result;
+      let AllUnformattedAns = '';
+      UnformattedAns.forEach(item => {
+        AllUnformattedAns += item.pageContent;
+      });
     
-    // Create a styled answer card with line-by-line paragraphs
-    const answerCard = `
-      <div class="ai-answer-card my-4 p-4 border rounded-lg bg-gray-50">
-        <h3 class="text-lg font-bold mb-2">Answer:</h3>
-        <div class="prose prose-sm">
-          ${FinalAns.split('\n').map(line => `<p>${line.trim()}</p>`).join('')}
+      const PROMPT = `For the question: "${selectedText}", please provide a detailed and well-formatted answer in HTML. The answer should be based on the following content: ${AllUnformattedAns}. Ensure the response is clear, concise, and properly structured.`;
+    
+      const AiModelResult = await chatSession.sendMessage(PROMPT);
+      const responseText = await AiModelResult.response.text();
+      console.log("Raw AI Response:", responseText);
+      const FinalAns = responseText.replace(/```/g, '').replace(/html/g, '').trim();
+      
+      // Create a styled answer card with line-by-line paragraphs
+      const answerCard = `
+        <div class="ai-answer-card my-4 p-4 border rounded-lg bg-gray-50">
+          <h3 class="text-lg font-bold mb-2">Answer:</h3>
+          <div class="prose prose-sm">
+            ${FinalAns.split('\n').map(line => `<p>${line.trim()}</p>`).join('')}
+          </div>
         </div>
-      </div>
-    `;
-  
-    // Insert the answer card to the editor
-    editor.commands.insertContent(answerCard);
-  
-    // Save the updated content
-    SaveNotes({
-      notes: editor.getHTML(),
-      fileId: fileId,
-      createdBy: user?.primaryEmailAddress?.emailAddress
-    });
+      `;
+    
+      // Insert the answer card to the editor
+      editor.commands.insertContent(answerCard);
+    
+      // Save the updated content
+      SaveNotes({
+        notes: editor.getHTML(),
+        fileId: fileid,
+        createdBy: user?.primaryEmailAddress?.emailAddress
+      });
+    } catch (error) {
+      console.error("Error calling AI action:", error);
+    }
   };
 
   return editor && (

@@ -22,42 +22,62 @@ function ResizeHandle() {
   );
 }
 
-function Workspace() {
-    const { fileid } = useParams();
-    const fileInfo = useQuery(api.fileStorage.GetFileRecord, {
-      fileId: fileid  // pass the dynamic param correctly
+// Example function to call the action
+async function onAiClick(query) {
+  const { fileid } = useParams(); // Get the fileId from the URL params
+
+  if (!fileid) {
+    console.error("fileId is missing");
+    return;
+  }
+
+  try {
+    const result = await api.myAction.search({
+      fileId: fileid,
+      query: query
     });
-
-    useEffect(() => {
-      if (fileInfo) {
-        console.log("File URL:", fileInfo.fileUrl);
-      }
-    }, [fileInfo]);
-
-    if (!fileInfo) {
-        return <div>Loading...</div>
-    }
-
-    return (
-        <div className="flex flex-col h-screen">
-            <WorkspaceHeader/>
-            <PanelGroup direction="horizontal" className="flex-1">
-                <Panel defaultSize={50} minSize={30}>
-                    <div className="h-full border rounded-lg">
-                        <TextEditor/>
-                    </div>
-                </Panel>
-                
-                <ResizeHandle />
-                
-                <Panel defaultSize={50} minSize={30}>
-                    <div className="h-full border rounded-lg overflow-hidden">
-                        <PdfViewer fileUrl={fileInfo?.fileUrl}/>
-                    </div>
-                </Panel>
-            </PanelGroup>
-        </div>
-    )
+    console.log(result);
+  } catch (error) {
+    console.error("Error calling AI action:", error);
+  }
 }
 
-export default Workspace
+function Workspace() {
+  const { fileid } = useParams();
+  const fileInfo = useQuery(api.fileStorage.GetFileRecord, {
+    fileId: fileid  // pass the dynamic param correctly
+  });
+
+  useEffect(() => {
+    if (fileInfo) {
+      console.log("File URL:", fileInfo.fileUrl);
+    }
+  }, [fileInfo]);
+
+  if (!fileInfo) {
+    return <div>Loading...</div>
+  }
+
+  return (
+    <div className="flex flex-col h-screen">
+      <WorkspaceHeader/>
+      <PanelGroup direction="horizontal" className="flex-1">
+        <Panel defaultSize={50} minSize={30}>
+          <div className="h-full border rounded-lg">
+            <TextEditor/>
+          </div>
+        </Panel>
+        
+        <ResizeHandle />
+        
+        <Panel defaultSize={50} minSize={30}>
+          <div className="h-full border rounded-lg overflow-hidden">
+            <PdfViewer fileUrl={fileInfo?.fileUrl}/>
+          </div>
+        </Panel>
+      </PanelGroup>
+    </div>
+  )
+}
+
+export default Workspace;
