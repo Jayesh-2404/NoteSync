@@ -18,7 +18,7 @@ import uuid4 from 'uuid4';
 import { useUser } from '@clerk/nextjs';
 import axios from 'axios';
 
-function UploadPdfDialog() {
+function UploadPdfDialog({ maxFiles, fileCount }) {
   const [file, setFile] = useState(null);
   const [fileName, setFileName] = useState('');
   const [loading, setLoading] = useState(false);
@@ -45,7 +45,7 @@ function UploadPdfDialog() {
       const { storageId } = await result.json();
       const fileId = uuid4();
       const fileUrl = await getFileUrl({ storageId: storageId });
-      const resp = await AddFileEntryToDb({
+      await AddFileEntryToDb({
         fileId: fileId,
         storageId: storageId,
         fileName: fileName || 'Untitled File',
@@ -69,7 +69,7 @@ function UploadPdfDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button onClick={() => setOpen(true)}>+ Upload PDF File</Button>
+        <Button onClick={() => setOpen(true)} disabled={fileCount >= maxFiles}>+ Upload PDF File</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
@@ -102,7 +102,7 @@ function UploadPdfDialog() {
               Close
             </Button>
           </DialogClose>
-          <Button onClick={OnUpload} disabled={loading}>
+          <Button onClick={OnUpload} disabled={loading || fileCount >= maxFiles}>
             {loading ? (
               <Loader2 className="animate-spin" />
             ) : (
