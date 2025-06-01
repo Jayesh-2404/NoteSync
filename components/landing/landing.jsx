@@ -168,7 +168,7 @@ export default function LandingPage() {
               <div className="flex items-center justify-center">
                 <div className="relative aspect-video overflow-hidden rounded-xl border bg-background shadow-xl">
                   <Image
-                    src="/placeholder.svg?height=720&width=1280"
+                    src="/home.png?height=720&width=1280"
                     width={1280}
                     height={720}
                     alt="App screenshot showing PDF and note-taking interface"
@@ -268,7 +268,7 @@ export default function LandingPage() {
                     <div className="text-sm font-medium mb-2 pb-2 border-b">PDF Document</div>
                     <div className="flex-1 bg-muted/30 rounded-md">
                       <Image
-                        src="/placeholder.svg?height=600&width=500"
+                        src="/note.png?height=600&width=500"
                         width={500}
                         height={600}
                         alt="PDF document view"
