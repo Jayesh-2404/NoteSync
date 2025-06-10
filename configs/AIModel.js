@@ -1,4 +1,4 @@
-require('dotenv').config(); 
+require('dotenv').config();
 
 const {
   GoogleGenerativeAI,
@@ -6,7 +6,7 @@ const {
   HarmBlockThreshold,
 } = require("@google/generative-ai");
 
-const apiKey = process.env.GOOGLE_API_KEY;
+const apiKey = "AIzaSyDjwXlla2d3XHBqIz9UfaIrHJgga9TZc5g";
 if (!apiKey) {
   throw new Error('GOOGLE_API_KEY is not set in .env');
 }

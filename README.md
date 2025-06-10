@@ -1,36 +1,79 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# AI PDF Note Taker
+
+An intelligent web application that helps users extract and organize notes from PDF documents using AI. Built with Next.js, this application provides a modern and intuitive interface for managing PDF documents and their extracted notes.
+
+## Features
+
+- 📄 PDF Document Upload and Management
+- 🤖 AI-Powered Note Extraction
+- 📝 Rich Text Editor for Note Organization
+- 🔒 User Authentication with Clerk
+- 💾 Real-time Data Storage with Convex
+- 🎨 Modern UI with Tailwind CSS
+- 📱 Responsive Design
+
+## Tech Stack
+
+- **Frontend Framework**: Next.js 15
+- **Authentication**: Clerk
+- **Database**: Convex
+- **AI Integration**: 
+  - Google Generative AI
+  - LangChain
+- **UI Components**:
+  - Radix UI
+  - TipTap Editor
+  - Tailwind CSS
+- **PDF Processing**: pdf-parse
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
 
+- Node.js (Latest LTS version recommended)
+- npm or yarn
+- Convex account
+- Clerk account
+- Google AI API key
+
+### Installation
+
+1. Clone the repository:
+```bash
+git clone https://github.com/yourusername/ai-pdf-note-taker.git
+cd ai-pdf-note-taker
+```
+
+2. Install dependencies:
+```bash
+npm install
+# or
+yarn install
+```
+
+3. Set up environment variables:
+Create a `.env.local` file in the root directory with the following variables:
+```env
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key
+CLERK_SECRET_KEY=your_clerk_secret_key
+NEXT_PUBLIC_CONVEX_URL=your_convex_url
+GOOGLE_AI_API_KEY=your_google_ai_api_key
+```
+
+4. Run the development server:
 ```bash
 npm run dev
 # or
 yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+5. Open [http://localhost:3000](http://localhost:3000) with your browser to see the application.
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+## Usage
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. Sign in to your account
+2. Upload a PDF document
+3. Wait for the AI to process and extract notes
+4. Edit and organize your notes using the rich text editor
+5. Save and manage your notes for future reference
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
