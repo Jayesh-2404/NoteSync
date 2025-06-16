@@ -15,7 +15,7 @@ export const ingest = action({
       args.splitText,
       args.fileId,
       new GoogleGenerativeAIEmbeddings({
-        apiKey: 'AIzaSyAqQ7_uUxakDiicd9W87wH1aW-R_3aoj14',
+        apiKey: 'AIzaSyCbzAyNZmLc8McWvDEmhTv8ruvneLHUQ6E',
         model: "text-embedding-004",
         taskType: TaskType.RETRIEVAL_DOCUMENT,
         title: "Document title",
@@ -37,7 +37,7 @@ export const search = action({
         args.query,
         args.fileId,
         new GoogleGenerativeAIEmbeddings({
-          apiKey: 'AIzaSyAqQ7_uUxakDiicd9W87wH1aW-R_3aoj14 ',
+          apiKey: 'AIzaSyCbzAyNZmLc8McWvDEmhTv8ruvneLHUQ6E ',
           model: "text-embedding-004",
           taskType: TaskType.RETRIEVAL_DOCUMENT,
           title: "Document title",

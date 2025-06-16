@@ -6,9 +6,9 @@ const {
   HarmBlockThreshold,
 } = require("@google/generative-ai");
 
-const apiKey = "AIzaSyDjwXlla2d3XHBqIz9UfaIrHJgga9TZc5g";
+const apiKey = "AIzaSyCbzAyNZmLc8McWvDEmhTv8ruvneLHUQ6E";
 if (!apiKey) {
-  throw new Error('GOOGLE_API_KEY is not set in .env');
+  throw new Error(' Not Found');
 }
 const genAI = new GoogleGenerativeAI(apiKey);
 
