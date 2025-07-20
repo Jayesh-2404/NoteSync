@@ -21,6 +21,8 @@ import { api } from '@/convex/_generated/api';
 import chatSession from '../../../configs/AIModel';
 import { useUser } from '@clerk/nextjs';
 import { Button } from '@/components/ui/button';
+import {marked} from 'marked';
+
 
 function EditorExtension({ editor }) {
   const { fileid } = useParams();
@@ -88,18 +90,19 @@ function EditorExtension({ editor }) {
       The response should be clear, concise, and directly answer the question based on the provided context.`;
 
       const AiModelResult = await chatSession.sendMessage(PROMPT);
-      const responseText = await AiModelResult.response.text();
-      const finalHtml = responseText.replace(/```/g, '').replace(/html/g, '').trim();
+      const rawResponseText  = await AiModelResult.response.text();
+       const cleanedText = rawResponseText.replace(/```(markdown)?/g, '').trim();
+      const finalHtml = marked.parse(cleanedText);
+
+      console.log("Generated HTML from AI Response:", finalHtml);
 
       const answerCard = `
         <div class="ai-answer-card my-4 p-4 border rounded-lg bg-gray-50 prose prose-sm max-w-none">
-          <h3 class="text-lg font-bold mb-2 flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5 text-primary"><path d="m12 3-1.9 1.9-1.1-1.1-2 2 1.1 1.1L6.2 7 3 12l7.1 2.9 1.9-1.9 1.1 1.1 2-2-1.1-1.1L17.8 9Z"/><path d="m12 21 1.9-1.9 1.1 1.1 2-2-1.1-1.1L17.8 17 21 12l-7.1-2.9-1.9 1.9-1.1-1.1-2 2 1.1 1.1L6.2 15Z"/></svg>AI Answer</h3>
+          <h3 class="text-lg font-bold mb-2 flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5 text-primary"><path d="m12 3-1.9 1.9-1.1-1.1-2 2 1.1 1.1L6.2 7 3 12l7.1 2.9 1.9-1.9 1.1 1.1 2-2-1.1-1.1L17.8 9Z"/><path d="m12 21 1.9-1.9 1.1 1.1 2-2-1.1-1.1L17.8 17 21 12l-7.1-2.9-1.9 1.9-1.1-1.1-2 2 1.1 1.1L6.2 15Z"/></svg>AI Answer</h3>
           ${finalHtml}
         </div>
-      `;
-
+        `;
       editor.chain().focus().insertContent(answerCard).run();
-      // Auto-save after AI response
       await handleSave();
     } catch (error) {
       console.error("Error calling AI action:", error);
