@@ -1,25 +1,47 @@
-import { action, mutation } from "./_generated/server.js";
+import { action, mutation, internalQuery } from "./_generated/server.js";
 import { v } from "convex/values";
+import { api } from "./_generated/api.js";
 
 export const AddNotes = mutation({
   args: {
     fileId: v.string(),
-    notes:v.any(),
+    notes: v.any(),
     createdBy: v.string()
   },
   handler: async (ctx, args) => {
-    const recordId = await ctx.db.query("notes")
-    .filter(q => q.eq(q.field("fileId"), args.fileId)).collect();
+    const existingNote = await ctx.db.query("notes")
+      .filter(q => q.eq(q.field("fileId"), args.fileId))
+      .first();
 
-    if(recordId?.length==0){
-      await ctx.db.insert('notes',{
-        fileId:args.fileId,
-        notes:args.notes,
-        createdBy:args.createdBy
-      })
-    }else{
-      await ctx.db.patch(record[0]._id , {notes:args.notes})
+    if (existingNote) {
+
+      await ctx.db.patch(existingNote._id, { notes: args.notes });
+    } else {
+      await ctx.db.insert('notes', {
+        fileId: args.fileId,
+        notes: args.notes,
+        createdBy: args.createdBy
+      });
     }
   },
 });
 
+// This action safely loads notes for a given fileId.
+export const loadNote = action({
+  args: { fileId: v.string() },
+  handler: async (ctx, args) => {
+    const note = await ctx.runQuery(api.notes.getNoteByFileId, { fileId: args.fileId });
+    return note?.notes || '';
+  },
+});
+
+// This internal query fetches the note from the database.
+export const getNoteByFileId = internalQuery({
+  args: { fileId: v.string() },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("notes")
+      .filter((q) => q.eq(q.field("fileId"), args.fileId))
+      .first();
+  },
+});
