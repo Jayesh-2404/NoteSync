@@ -1,6 +1,6 @@
 import CallToAction from "./sections/CallToAction";
 import Demo from "./sections/Demo";
-import Features from "./sections/Features";
+import Features from "./sections/Fea";
 import Footer from "./sections/Footer";
 import Header from "./sections/Header";
 import Hero from "./sections/Hero";
