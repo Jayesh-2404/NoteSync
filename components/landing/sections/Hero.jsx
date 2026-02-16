@@ -20,7 +20,8 @@ export default function Hero() {
 
               <p className="max-w-3xl mx-auto text-muted-foreground text-lg">
                 NoteSync revolutionizes how you interact with PDFs. Upload
-                documents, take rich-text notes side-by-side, and harness AI to
+                documents, collaborate live with your team, add discussion
+                comments, take rich-text notes side-by-side, and harness AI to
                 find answers instantly.
               </p>
             </div>

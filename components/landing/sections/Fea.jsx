@@ -1,4 +1,50 @@
-import { FileText, Code, PenTool, Sparkles } from "lucide-react";
+import {
+  FileText,
+  PenTool,
+  Sparkles,
+  Users,
+  MessageSquare,
+  Share2,
+} from "lucide-react";
+
+const featureItems = [
+  {
+    title: "Real-Time Collaboration",
+    description:
+      "Work together in the same note at the same time with live cursors and presence indicators.",
+    icon: Users,
+  },
+  {
+    title: "Inline Discussion Comments",
+    description:
+      "Leave comments on selected text, resolve discussion threads, and keep review feedback organized.",
+    icon: MessageSquare,
+  },
+  {
+    title: "Shareable Workspace Links",
+    description:
+      "Share a workspace instantly so teammates can join the same document and notes context.",
+    icon: Share2,
+  },
+  {
+    title: "Side-by-Side PDF Viewing",
+    description:
+      "Read PDFs and write notes in one workspace for faster context switching and deeper focus.",
+    icon: FileText,
+  },
+  {
+    title: "Rich Text Note Editing",
+    description:
+      "Structure content with headings, formatting, highlights, and lists while notes auto-save in the background.",
+    icon: PenTool,
+  },
+  {
+    title: "AI-Powered Q&A",
+    description:
+      "Select content and ask questions to generate contextual answers directly from the document.",
+    icon: Sparkles,
+  },
+];
 
 export default function Features() {
   return (
@@ -16,67 +62,23 @@ export default function Features() {
               Everything you need for effective note-taking
             </h2>
             <p className="max-w-[900px] text-muted-foreground md:text-xl/relaxed">
-              Our powerful features help you capture, organize, and enhance your
-              notes while studying PDF documents.
+              NoteSync combines collaboration, AI, and structured note-taking
+              so your team can learn and ship faster from long documents.
             </p>
           </div>
         </div>
-        <div className="mx-auto grid max-w-5xl items-center gap-6 py-12 lg:grid-cols-2 lg:gap-10">
-          <div className="grid gap-6">
-            <div className="grid gap-1">
-              <div className="flex items-center gap-2">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-                  <FileText className="h-5 w-5 text-primary" />
-                </div>
-                <h3 className="text-xl font-bold">Side-by-side PDF Viewing</h3>
+        <div className="mx-auto grid max-w-6xl gap-6 py-12 sm:grid-cols-2 lg:grid-cols-3">
+          {featureItems.map(({ icon: Icon, title, description }) => (
+            <div key={title} className="rounded-xl border bg-background p-5 shadow-sm">
+              <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+                <Icon className="h-5 w-5 text-primary" />
               </div>
-              <p className="text-muted-foreground">
-                View your PDF documents alongside your notes for seamless
-                reference and study. Scroll, zoom, and navigate with ease.
-              </p>
+              <h3 className="text-xl font-bold">{title}</h3>
+              <p className="mt-2 text-muted-foreground">{description}</p>
             </div>
-            <div className="grid gap-1">
-              <div className="flex items-center gap-2">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-                  <PenTool className="h-5 w-5 text-primary" />
-                </div>
-                <h3 className="text-xl font-bold">Rich Text Formatting</h3>
-              </div>
-              <p className="text-muted-foreground">
-                Format your notes with bold text, colorful highlighting, and
-                multiple heading levels to organize your thoughts.
-              </p>
-            </div>
-          </div>
-          <div className="grid gap-6">
-            <div className="grid gap-1">
-              <div className="flex items-center gap-2">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-                  <Code className="h-5 w-5 text-primary" />
-                </div>
-                <h3 className="text-xl font-bold">Code Templates</h3>
-              </div>
-              <p className="text-muted-foreground">
-                Insert pre-defined code snippets and templates with syntax
-                highlighting for programming notes and documentation.
-              </p>
-            </div>
-            <div className="grid gap-1">
-              <div className="flex items-center gap-2">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-                  <Sparkles className="h-5 w-5 text-primary" />
-                </div>
-                <h3 className="text-xl font-bold">AI-Powered Assistance</h3>
-              </div>
-              <p className="text-muted-foreground">
-                Select text and ask questions to get instant AI-powered
-                insights, explanations, and suggestions.
-              </p>
-            </div>
-          </div>
+          ))}
         </div>
       </div>
     </section>
-
   );
 }
