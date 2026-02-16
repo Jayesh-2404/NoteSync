@@ -20,6 +20,11 @@ export function useCollaboration(fileId, user) {
 
   const signalingConnectedRef = useRef(false);
   const peerCountRef = useRef(0);
+  const sessionIdRef = useRef(
+    typeof crypto !== "undefined" && crypto.randomUUID
+      ? crypto.randomUUID()
+      : `session-${Math.random().toString(36).slice(2, 10)}`
+  );
 
   const userEmail = user?.primaryEmailAddress?.emailAddress || "guest@notesync.local";
   const userName = user?.fullName || user?.firstName || "Guest";
@@ -32,6 +37,7 @@ export function useCollaboration(fileId, user) {
       name: userName,
       color: getCollaboratorColor(email),
       avatar: userAvatar,
+      sessionId: sessionIdRef.current,
     };
   }, [userAvatar, userEmail, userName]);
 
@@ -67,17 +73,25 @@ export function useCollaboration(fileId, user) {
     awareness.setLocalStateField("user", localUser);
 
     const syncAwareness = () => {
-      const usersByIdentity = new Map();
+      const users = [];
       awareness.getStates().forEach((state, clientId) => {
-        if (!state?.user) return;
-        const identityKey = state.user.email || `client-${clientId}`;
-        if (usersByIdentity.has(identityKey)) return;
-        usersByIdentity.set(identityKey, {
+        const sessionUser = state?.user;
+        if (!sessionUser) return;
+
+        const email = sessionUser.email || `guest-${clientId}`;
+        users.push({
           clientId,
-          ...state.user,
+          sessionId: sessionUser.sessionId || `client-${clientId}`,
+          email,
+          name: sessionUser.name || "Guest",
+          color: sessionUser.color || getCollaboratorColor(email),
+          avatar: sessionUser.avatar || null,
+          isLocal: clientId === awareness.clientID,
         });
       });
-      setCollaborators(Array.from(usersByIdentity.values()));
+
+      users.sort((a, b) => Number(b.isLocal) - Number(a.isLocal));
+      setCollaborators(users);
     };
 
     const handleStatus = ({ connected }) => {
@@ -86,7 +100,9 @@ export function useCollaboration(fileId, user) {
     };
 
     const handlePeers = ({ webrtcPeers = [], bcPeers = [] }) => {
-      const totalPeers = new Set([...webrtcPeers, ...bcPeers]).size;
+      const peersFromProvider = new Set([...webrtcPeers, ...bcPeers]).size;
+      const peersFromAwareness = Math.max(awareness.getStates().size - 1, 0);
+      const totalPeers = Math.max(peersFromProvider, peersFromAwareness);
       peerCountRef.current = totalPeers;
       setPeerCount(totalPeers);
       updateConnectionStatus();
