@@ -20,6 +20,8 @@
     "@radix-ui/react-slot": "^1.1.1",
     "@tiptap/extension-bold": "^2.11.5",
     "@tiptap/extension-code": "^2.11.5",
+    "@tiptap/extension-collaboration": "^2.11.5",
+    "@tiptap/extension-collaboration-cursor": "^2.11.5",
     "@tiptap/extension-heading": "^2.11.5",
     "@tiptap/extension-highlight": "^2.11.5",
     "@tiptap/extension-italic": "^2.11.5",
@@ -45,7 +47,9 @@
     "react-resizable-panels": "^2.1.7",
     "tailwind-merge": "^2.5.5",
     "tailwindcss-animate": "^1.0.7",
-    "uuid4": "^2.0.3"
+    "uuid4": "^2.0.3",
+    "y-webrtc": "^10.3.0",
+    "yjs": "^13.6.29"
   },
   "devDependencies": {
     "@tailwindcss/typography": "^0.5.16",

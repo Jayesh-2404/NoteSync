@@ -114,6 +114,30 @@ body {
     pointer-events: none;
   } */
 }
+
+.tiptap .collaboration-cursor__caret {
+  border-left: 1px solid currentColor;
+  border-right: 1px solid currentColor;
+  margin-left: -1px;
+  margin-right: -1px;
+  pointer-events: none;
+  position: relative;
+  word-break: normal;
+}
+
+.tiptap .collaboration-cursor__label {
+  border-radius: 4px 4px 4px 0;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 600;
+  left: -1px;
+  line-height: 1;
+  padding: 4px 6px;
+  position: absolute;
+  top: -1.4em;
+  user-select: none;
+  white-space: nowrap;
+}
 @layer base {
   :root {
     --background: 0 0% 100%;

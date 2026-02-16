@@ -1,4 +1,4 @@
-import { action, mutation, internalQuery } from "./_generated/server.js";
+import { action, mutation, internalQuery, query } from "./_generated/server.js";
 import { v } from "convex/values";
 import { api } from "./_generated/api.js";
 
@@ -10,7 +10,7 @@ export const AddNotes = mutation({
   },
   handler: async (ctx, args) => {
     const existingNote = await ctx.db.query("notes")
-      .filter(q => q.eq(q.field("fileId"), args.fileId))
+      .withIndex("by_fileId", (q) => q.eq("fileId", args.fileId))
       .first();
 
     if (existingNote) {
@@ -35,13 +35,23 @@ export const loadNote = action({
   },
 });
 
+export const getNoteLive = query({
+  args: { fileId: v.string() },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("notes")
+      .withIndex("by_fileId", (q) => q.eq("fileId", args.fileId))
+      .first();
+  },
+});
+
 // This internal query fetches the note from the database.
 export const getNoteByFileId = internalQuery({
   args: { fileId: v.string() },
   handler: async (ctx, args) => {
     return await ctx.db
       .query("notes")
-      .filter((q) => q.eq(q.field("fileId"), args.fileId))
+      .withIndex("by_fileId", (q) => q.eq("fileId", args.fileId))
       .first();
   },
 });

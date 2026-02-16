@@ -14,98 +14,82 @@ import {
   Save,
   Loader2,
   Check,
+  MessageSquare,
 } from 'lucide-react';
 import { useParams } from 'next/navigation';
 import { useAction, useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
-import chatSession from '../../../configs/AIModel';
 import { useUser } from '@clerk/nextjs';
 import { Button } from '@/components/ui/button';
-import {marked} from 'marked';
+import { marked } from 'marked';
 
-
-function EditorExtension({ editor }) {
+function EditorExtension({ editor, collaborationNode = null, onToggleComments, isCommentsOpen = false }) {
   const { fileid } = useParams();
-  const SearchAI = useAction(api.myAction.search);
+  const AskDocument = useAction(api.myAction.answerQuestion);
   const SaveNotes = useMutation(api.notes.AddNotes);
   const { user } = useUser();
   const [saveState, setSaveState] = useState('saved');
+  const [aiLoading, setAiLoading] = useState(false);
 
   useEffect(() => {
-    if (editor) {
-      const handleUpdate = () => {
-        setSaveState('unsaved');
-      };
-      editor.on('update', handleUpdate);
-      return () => {
-        editor.off('update', handleUpdate);
-      };
-    }
+    if (!editor) return;
+
+    const handleUpdate = () => {
+      setSaveState('unsaved');
+    };
+
+    editor.on('update', handleUpdate);
+    return () => {
+      editor.off('update', handleUpdate);
+    };
   }, [editor]);
 
   const handleSave = useCallback(async () => {
-    if (!editor || !fileid || !user) return;
+    if (!editor || !fileid || !user?.primaryEmailAddress?.emailAddress) return;
     setSaveState('saving');
     try {
       await SaveNotes({
         notes: editor.getHTML(),
         fileId: fileid,
-        createdBy: user?.primaryEmailAddress?.emailAddress,
+        createdBy: user.primaryEmailAddress.emailAddress,
       });
       setSaveState('saved');
     } catch (error) {
-      console.error("Failed to save notes:", error);
+      console.error('Failed to save notes:', error);
       setSaveState('unsaved');
     }
   }, [editor, fileid, user, SaveNotes]);
 
   const onAiClick = async () => {
+    if (!editor || !fileid) return;
+
     const selectedText = editor.state.doc.textBetween(
       editor.state.selection.from,
       editor.state.selection.to,
       ' '
     );
-    if (!selectedText) {
-      alert("Please select some text first");
-      return;
-    }
-    if (!fileid) {
-      console.error("fileId is missing");
+    const question = selectedText?.trim();
+
+    if (!question) {
+      alert('Please select some text first.');
       return;
     }
 
     try {
-      const result = await SearchAI({ query: selectedText, fileId: fileid });
-      if (!Array.isArray(result)) throw new Error("Expected an array of texts");
-
-      const contextText = result.map((item) => item.pageContent).join('\n\n');
-
-      const PROMPT = `Based on the following context, please provide a detailed and well-formatted answer in HTML for the question: "${selectedText}".
-      Context: ###
-      ${contextText}
-      ###
-
-      Use only the following HTML tags: <p>, <ul>, <ol>, <li>, <strong>, <em>.
-      Do not include any other tags like <html>, <body>, or \`\`\`.
-      The response should be clear, concise, and directly answer the question based on the provided context.`;
-
-      const AiModelResult = await chatSession.sendMessage(PROMPT);
-      const rawResponseText  = await AiModelResult.response.text();
-       const cleanedText = rawResponseText.replace(/```(markdown)?/g, '').trim();
+      setAiLoading(true);
+      const result = await AskDocument({ query: question, fileId: fileid });
+      const rawResponseText = result?.answer || 'No answer generated.';
+      const cleanedText = rawResponseText.replace(/```(markdown)?/g, '').trim();
       const finalHtml = marked.parse(cleanedText);
 
-      console.log("Generated HTML from AI Response:", finalHtml);
-
-      const answerCard = `
-        <div class="ai-answer-card my-4 p-4 border rounded-lg bg-gray-50 prose prose-sm max-w-none">
-          <h3 class="text-lg font-bold mb-2 flex items-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5 text-primary"><path d="m12 3-1.9 1.9-1.1-1.1-2 2 1.1 1.1L6.2 7 3 12l7.1 2.9 1.9-1.9 1.1 1.1 2-2-1.1-1.1L17.8 9Z"/><path d="m12 21 1.9-1.9 1.1 1.1 2-2-1.1-1.1L17.8 17 21 12l-7.1-2.9-1.9 1.9-1.1-1.1-2 2 1.1 1.1L6.2 15Z"/></svg>AI Answer</h3>
-          ${finalHtml}
-        </div>
-        `;
-      editor.chain().focus().insertContent(answerCard).run();
+      // Keep inserted content compatible with TipTap schema (avoid custom wrapper div nodes).
+      editor.chain().focus().insertContent(`<h3>AI Answer</h3>${finalHtml}`).run();
       await handleSave();
     } catch (error) {
-      console.error("Error calling AI action:", error);
+      console.error('Error generating answer:', error);
+      alert('Failed to generate answer. Please try again.');
+    } finally {
+      setAiLoading(false);
     }
   };
 
@@ -137,42 +121,48 @@ function EditorExtension({ editor }) {
   };
 
   return editor && (
-    <div className='p-3 border-b'>
-      <div className="flex flex-wrap gap-2 items-center">
-        {/* Text formatting */}
+    <div className="p-3 border-b bg-background">
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex flex-wrap gap-2 items-center">
         <button onClick={() => editor.chain().focus().toggleBold().run()} disabled={!editor.can().chain().focus().toggleBold().run()} className={`p-2 rounded hover:bg-gray-100 ${editor.isActive('bold') ? 'bg-gray-200' : ''}`}><Bold size={20} /></button>
         <button onClick={() => editor.chain().focus().toggleItalic().run()} className={`p-2 rounded hover:bg-gray-100 ${editor.isActive('italic') ? 'bg-gray-200' : ''}`}><Italic size={20} /></button>
         <button onClick={() => editor.chain().focus().toggleUnderline().run()} className={`p-2 rounded hover:bg-gray-100 ${editor.isActive('underline') ? 'bg-gray-200' : ''}`}><Underline size={20} /></button>
         <div className="border-l mx-2 h-6"></div>
-        {/* Headings */}
         <button onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()} className={`p-2 rounded hover:bg-gray-100 ${editor.isActive('heading', { level: 1 }) ? 'bg-gray-200' : ''}`}><Heading1 size={20} /></button>
         <button onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} className={`p-2 rounded hover:bg-gray-100 ${editor.isActive('heading', { level: 2 }) ? 'bg-gray-200' : ''}`}><Heading2 size={20} /></button>
         <button onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()} className={`p-2 rounded hover:bg-gray-100 ${editor.isActive('heading', { level: 3 }) ? 'bg-gray-200' : ''}`}><Heading3 size={20} /></button>
         <div className="border-l mx-2 h-6"></div>
-        {/* Code and List */}
         <button onClick={() => editor.chain().focus().toggleCode().run()} className={`p-2 rounded hover:bg-gray-100 ${editor.isActive('code') ? 'bg-gray-200' : ''}`}><Code size={20} /></button>
         <button onClick={() => editor.chain().focus().toggleBulletList().run()} className={`p-2 rounded hover:bg-gray-100 ${editor.isActive('bulletList') ? 'bg-gray-200' : ''}`}><List size={20} /></button>
         <div className="border-l mx-2 h-6"></div>
-        {/* Highlight controls */}
         <div className="flex items-center gap-1">
           <button onClick={() => editor.chain().focus().toggleHighlight().run()} className={`p-2 rounded hover:bg-gray-100 ${editor.isActive('highlight') ? 'bg-gray-200' : ''}`}><Highlighter size={20} /></button>
           {[
-            { color: '#ffc078', label: 'Orange' }, { color: '#8ce99a', label: 'Green' }, { color: '#74c0fc', label: 'Blue' }, { color: '#b197fc', label: 'Purple' }, { color: '#ffa8a8', label: 'Red' }
+            { color: '#d6d3d1', label: 'Stone' },
+            { color: '#d1d5db', label: 'Gray' },
+            { color: '#cbd5e1', label: 'Slate' },
+            { color: '#ddd6fe', label: 'Lavender' },
+            { color: '#fecaca', label: 'Rose' },
           ].map(({ color, label }) => (
             <button key={color} onClick={() => editor.chain().focus().toggleHighlight({ color }).run()} className="w-6 h-6 rounded-full hover:ring-2 hover:ring-offset-2 hover:ring-gray-400 transition-all" title={label} style={{ backgroundColor: color, border: editor.isActive('highlight', { color }) ? '2px solid black' : 'none' }} />
           ))}
           {editor.isActive('highlight') && (<button onClick={() => editor.chain().focus().unsetHighlight().run()} className="p-2 rounded hover:bg-gray-100" title="Remove highlight"><X size={16} /></button>)}
         </div>
-        {/* AI Button */}
-        <button onClick={onAiClick} className="p-2 rounded hover:bg-gray-100" title="AI Search"><Sparkles size={20} /></button>
+        <button onClick={onAiClick} disabled={aiLoading} className="p-2 rounded hover:bg-gray-100 disabled:opacity-50 border border-transparent hover:border-gray-200" title="AI Search">
+          {aiLoading ? <Loader2 size={20} className="animate-spin" /> : <Sparkles size={20} />}
+        </button>
+        <button
+          onClick={onToggleComments}
+          className={`p-2 rounded hover:bg-gray-100 border border-transparent hover:border-gray-200 ${isCommentsOpen ? 'bg-gray-200' : ''}`}
+          title="Comments"
+        >
+          <MessageSquare size={20} />
+        </button>
+        </div>
 
-
-      {/* save note feature */}
-        <div className="flex-grow"></div>
-
-
-        <div className="flex items-center">
-          {renderSaveButton()}
+        <div className="flex items-center gap-3">
+          {collaborationNode}
+          <div className="flex items-center">{renderSaveButton()}</div>
         </div>
       </div>
     </div>
