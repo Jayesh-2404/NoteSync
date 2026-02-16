@@ -34,6 +34,8 @@ function UploadPdfDialog({ maxFiles, fileCount }) {
   };
 
   const OnUpload = async () => {
+    if (!file || !user?.primaryEmailAddress?.emailAddress) return;
+
     setLoading(true);
     try {
       const postUrl = await generateUploadUrl();
@@ -52,7 +54,7 @@ function UploadPdfDialog({ maxFiles, fileCount }) {
         fileUrl: fileUrl,
         createdBy: user?.primaryEmailAddress?.emailAddress,
       });
-      const ApiResp = await axios.get('/api/pdf-loader?pdfUrl=' + fileUrl);
+      const ApiResp = await axios.get('/api/pdf-loader?pdfUrl=' + encodeURIComponent(fileUrl));
       await embeddingDocument({
         splitText: ApiResp.data.result,
         fileId: fileId,
@@ -102,7 +104,7 @@ function UploadPdfDialog({ maxFiles, fileCount }) {
               Close
             </Button>
           </DialogClose>
-          <Button onClick={OnUpload} disabled={loading || fileCount >= maxFiles}>
+          <Button onClick={OnUpload} disabled={loading || fileCount >= maxFiles || !file}>
             {loading ? (
               <Loader2 className="animate-spin" />
             ) : (

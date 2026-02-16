@@ -2,6 +2,9 @@ import { NextResponse   } from "next/server";
 import { WebPDFLoader } from "@langchain/community/document_loaders/web/pdf";
 import {RecursiveCharacterTextSplitter} from "langchain/text_splitter"
 // const pdfUrl = "https://clear-grouse-373.convex.cloud/api/storage/c8331ed2-77f9-4a8b-a4f5-cc506d0c7fd4"
+
+export const dynamic = "force-dynamic";
+
 export async function GET(req){
     try {
         // Load   
@@ -13,8 +16,7 @@ export async function GET(req){
             throw new Error("pdfUrl parameter is required.");
         }
 
-        const response = await fetch(pdfUrl);
-        console.log(pdfUrl);
+        const response = await fetch(pdfUrl, { cache: "no-store" });
         
         // Check if the response is OK
         if (!response.ok) {
@@ -41,10 +43,10 @@ export async function GET(req){
 
         //split the text into small chunk
         const splitter = new RecursiveCharacterTextSplitter({
-            chunkSize : 100, 
-            chunkOverlap : 20,
+            chunkSize : 1200, 
+            chunkOverlap : 180,
         });
-        const output = await splitter.splitText(pdfTextContent.map(doc => doc.pageContent).join(''));
+        const output = await splitter.splitText(pdfTextContent.map(doc => doc.pageContent).join('\n'));
         // let splitterList = [];
         // output.forEach(doc=>{
         //     splitterList.push(doc.pageContent);
