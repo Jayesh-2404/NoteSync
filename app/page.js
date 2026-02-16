@@ -19,12 +19,13 @@ export default function Home() {
 
 
     const CheckUser = async() => {
-      // if (!user) return;
-      
+      const email = user?.primaryEmailAddress?.emailAddress;
+      if (!email) return;
+
       const result = await createUser({
-        email: user?.primaryEmailAddress?.emailAddress,
-        userName: user?.fullName,
-        imageUrl: user?.imageUrl
+        email,
+        userName: user?.fullName || user?.firstName || "User",
+        imageUrl: user?.imageUrl || ""
       });
       console.log(result);
     }

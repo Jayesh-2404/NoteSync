@@ -1,4 +1,3 @@
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import {Outfit} from 'next/font/google'
 import Provider from "./provider";

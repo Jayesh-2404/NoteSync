@@ -22,26 +22,6 @@ function ResizeHandle() {
   );
 }
 
-// Example function to call the action
-async function onAiClick(query) {
-  const { fileid } = useParams(); // Get the fileId from the URL params
-
-  if (!fileid) {
-    console.error("fileId is missing");
-    return;
-  }
-
-  try {
-    const result = await api.myAction.search({
-      fileId: fileid,
-      query: query
-    });
-    console.log(result);
-  } catch (error) {
-    console.error("Error calling AI action:", error);
-  }
-}
-
 function Workspace() {
   const { fileid } = useParams();
   const fileInfo = useQuery(api.fileStorage.GetFileRecord, {

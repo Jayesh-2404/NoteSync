@@ -11,11 +11,11 @@ import UploadPdfDialog from './UploadPdfDialog'
 function SideBar() {
     const { user } = useUser();
     const userEmail = user?.primaryEmailAddress?.emailAddress;
-    console.log("User Email:", userEmail);
 
-    const fileList = useQuery(api.fileStorage.GetUserFiles, {
-      userEmail: userEmail
-    });
+    const fileList = useQuery(
+      api.fileStorage.GetUserFiles,
+      userEmail ? { userEmail } : "skip"
+    );
 
     if (!user) {
         return <div>Loading...</div>;

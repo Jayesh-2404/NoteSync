@@ -40,7 +40,7 @@ export const GetFileRecord = query({
   handler: async (ctx, args) => {
     const file = await ctx.db
       .query("pdfFiles")
-      .filter((q) => q.eq(q.field("fileId"), args.fileId))
+      .withIndex("by_fileId", (q) => q.eq("fileId", args.fileId))
       .first();
     return file;
   },
@@ -51,8 +51,10 @@ export const GetUserFiles = query({
     userEmail:v.string()
   },
   handler:async(ctx , args)=>{
-    const result = await ctx.db.query('pdfFiles')
-    .filter((q)=>q.eq(q.field('createdBy') , args.userEmail)).collect();
+    const result = await ctx.db
+      .query('pdfFiles')
+      .withIndex('by_createdBy', (q) => q.eq('createdBy', args.userEmail))
+      .collect();
     
     return result;
   
