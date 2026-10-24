@@ -10,7 +10,7 @@ export default function Hero() {
       <div className="absolute top-0 left-0 -translate-x-1/2 -translate-y-1/2 w-[60rem] h-[60rem] rounded-full bg-primary/10 blur-3xl -z-10" />
       <div className="absolute bottom-0 right-0 translate-x-1/2 translate-y-1/2 w-[50rem] h-[50rem] rounded-full bg-purple-500/10 blur-3xl -z-10" />
 
-      <div className="container px-4 md:px-6">
+      <div className="container mx-auto px-4 md:px-6">
         <div className="flex flex-col items-center text-center gap-12">
           <div className="flex flex-col items-center space-y-6">
             <div className="space-y-4">
@@ -54,11 +54,11 @@ export default function Hero() {
                 <div className="relative rounded-xl shadow-2xl shadow-primary/10 border border-primary/10">
                   <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent rounded-xl blur-lg" />
                   <Image
-                    src="/home.png?height=720&width=1280"
+                    src="/home.png"
                     width={1280}
                     height={720}
                     alt="App screenshot showing PDF and note-taking interface"
-                    className="relative rounded-xl object-cover"
+                    className="relative h-auto w-full rounded-xl object-cover"
                     priority
                   />
                 </div>

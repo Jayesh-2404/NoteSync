@@ -5,7 +5,7 @@ import { Code, Sparkles } from "lucide-react";
 export default function Demo() {
   return (
     <section id="demo" className="w-full py-12 md:py-24 lg:py-32">
-      <div className="container px-4 md:px-6">
+      <div className="container mx-auto px-4 md:px-6">
         <div className="flex flex-col items-center justify-center space-y-4 text-center">
           <div className="space-y-2">
             <h2 className="text-3xl font-bold tracking-tighter md:text-4xl/tight">
@@ -26,11 +26,11 @@ export default function Demo() {
                 </div>
                 <div className="flex-1 bg-muted/30 rounded-md overflow-hidden">
                   <Image
-                    src="/note.png?height=600&width=500"
+                    src="/note.png"
                     width={500}
                     height={600}
                     alt="PDF document view"
-                    className="w-full h-full object-cover"
+                    className="h-full w-full object-cover"
                   />
                 </div>
               </div>

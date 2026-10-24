@@ -16,7 +16,7 @@ export default function Page() {
           <p className="text-muted-foreground">Welcome back! Sign in to continue.</p>
         </div>
         <div className="bg-background shadow-lg rounded-lg p-8 w-full border">
-          <SignIn afterSignInUrl="/dashboard" redirectUrl="/dashboard" />
+          <SignIn fallbackRedirectUrl="/dashboard" />
         </div>
       </div>
     </div>
