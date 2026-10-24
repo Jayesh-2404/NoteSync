@@ -16,7 +16,7 @@ export default function Page() {
           <p className="text-muted-foreground">Create an account to start syncing your notes.</p>
         </div>
         <div className="bg-background shadow-lg rounded-lg p-8 w-full border">
-          <SignUp afterSignUpUrl="/dashboard" redirectUrl="/dashboard" />
+          <SignUp fallbackRedirectUrl="/dashboard" />
         </div>
       </div>
     </div>
