@@ -25,10 +25,37 @@ function InitialAvatar({ name, color, imageUrl }) {
   );
 }
 
-function CollaboratorPresence({ collaborators = [], connectionStatus = "disconnected" }) {
-  const connected = connectionStatus === "online";
-  const waiting = connectionStatus === "waiting";
-  const label = connected ? "live" : waiting ? "waiting" : "offline";
+const STATUS_META = {
+  online: {
+    label: "live",
+    dot: "bg-emerald-500",
+    title: "Live collaboration is active",
+  },
+  waiting: {
+    label: "waiting",
+    dot: "bg-amber-500",
+    title: "Connected to the signaling server, waiting for collaborators",
+  },
+  local: {
+    label: "local only",
+    dot: "bg-sky-500",
+    title:
+      "Only tabs in this browser can sync. Set NEXT_PUBLIC_YJS_SIGNALING to enable cross-device collaboration.",
+  },
+  connecting: {
+    label: "connecting",
+    dot: "bg-gray-400",
+    title: "Connecting to collaborators",
+  },
+  offline: {
+    label: "offline",
+    dot: "bg-gray-400",
+    title: "Not connected to a signaling server",
+  },
+};
+
+function CollaboratorPresence({ collaborators = [], connectionStatus = "offline" }) {
+  const status = STATUS_META[connectionStatus] || STATUS_META.offline;
   const memberCount = collaborators.length;
 
   return (
@@ -54,11 +81,9 @@ function CollaboratorPresence({ collaborators = [], connectionStatus = "disconne
         ) : null}
       </div>
 
-      <div className="flex items-center gap-1.5 text-xs">
-        <span
-          className={`w-2 h-2 rounded-full ${connected ? "bg-emerald-500" : waiting ? "bg-amber-500" : "bg-gray-400"}`}
-        />
-        <span className="text-muted-foreground capitalize">{label}</span>
+      <div className="flex items-center gap-1.5 whitespace-nowrap text-xs" title={status.title}>
+        <span className={`w-2 h-2 rounded-full ${status.dot}`} />
+        <span className="text-muted-foreground capitalize">{status.label}</span>
       </div>
     </div>
   );

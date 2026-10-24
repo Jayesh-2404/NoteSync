@@ -170,13 +170,17 @@ function TextEditor() {
         }
       />
 
-      <div className="flex-1 min-h-0 flex">
+      <div className="relative flex min-h-0 flex-1">
         <div className="flex-1 overflow-y-auto">
           <EditorContent editor={editor} />
         </div>
         {commentsOpen ? (
-          <div className="w-[340px] min-w-[300px]">
-            <CommentsPanel fileId={fileid} editor={editor} />
+          <div className="fixed inset-x-0 bottom-0 top-16 z-50 bg-background md:static md:z-auto md:w-[340px] md:min-w-[300px] md:border-l">
+            <CommentsPanel
+              fileId={fileid}
+              editor={editor}
+              onClose={() => setCommentsOpen(false)}
+            />
           </div>
         ) : null}
       </div>

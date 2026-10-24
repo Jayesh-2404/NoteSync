@@ -5,11 +5,16 @@ import * as Y from "yjs";
 import { WebrtcProvider } from "y-webrtc";
 import { getCollaboratorColor } from "@/lib/collaborationColors";
 
-const SIGNALING_SERVERS = [
-  "wss://y-webrtc-eu.fly.dev",
-  "wss://y-webrtc-us.fly.dev",
-  "wss://signaling.yjs.dev",
-];
+// Cross-device collaboration needs a y-webrtc signaling server. The public
+// instances this app used to point at are gone, so signaling is opt-in through
+// NEXT_PUBLIC_YJS_SIGNALING (comma separated). Without it the provider still
+// syncs tabs in the same browser over BroadcastChannel.
+const SIGNALING_SERVERS = (process.env.NEXT_PUBLIC_YJS_SIGNALING || "")
+  .split(",")
+  .map((url) => url.trim())
+  .filter(Boolean);
+
+const HAS_SIGNALING = SIGNALING_SERVERS.length > 0;
 
 export function useCollaboration(fileId, user) {
   const [provider, setProvider] = useState(null);
@@ -42,6 +47,12 @@ export function useCollaboration(fileId, user) {
   }, [userAvatar, userEmail, userName]);
 
   const updateConnectionStatus = () => {
+    if (!HAS_SIGNALING) {
+      // No signaling server: only same-browser tabs can see each other.
+      setConnectionStatus(peerCountRef.current > 0 ? "online" : "local");
+      return;
+    }
+
     if (!signalingConnectedRef.current) {
       setConnectionStatus("offline");
       return;

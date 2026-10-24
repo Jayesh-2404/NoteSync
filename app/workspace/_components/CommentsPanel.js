@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
-import { MessageSquare, CheckCircle2, Trash2 } from "lucide-react";
+import { MessageSquare, CheckCircle2, Trash2, X } from "lucide-react";
 import { useMutation, useQuery } from "convex/react";
 import { useUser } from "@clerk/nextjs";
 import { api } from "@/convex/_generated/api";
@@ -57,7 +57,7 @@ function CommentItem({ comment, onResolve, onDelete, canDelete }) {
   );
 }
 
-function CommentsPanel({ fileId, editor, className = "" }) {
+function CommentsPanel({ fileId, editor, className = "", onClose }) {
   const { user } = useUser();
   const [commentText, setCommentText] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -121,12 +121,24 @@ function CommentsPanel({ fileId, editor, className = "" }) {
   };
 
   return (
-    <aside className={`h-full border-l bg-muted/20 flex flex-col ${className}`}>
+    <aside className={`flex h-full flex-col bg-muted/20 ${className}`}>
       <div className="px-4 py-3 border-b bg-background">
         <div className="flex items-center gap-2">
           <MessageSquare className="h-4 w-4 text-muted-foreground" />
           <h3 className="text-sm font-semibold">Comments</h3>
           <span className="text-xs text-muted-foreground">({comments?.length || 0})</span>
+          {onClose ? (
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="ml-auto h-8 w-8 md:hidden"
+              aria-label="Close comments"
+              onClick={onClose}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          ) : null}
         </div>
       </div>
 
