@@ -121,9 +121,8 @@ function EditorExtension({ editor, collaborationNode = null, onToggleComments, i
   };
 
   return editor && (
-    <div className="p-3 border-b bg-background">
-      <div className="flex items-center justify-between gap-3">
-        <div className="flex flex-wrap gap-2 items-center">
+    <div className="flex flex-col gap-2 border-b bg-background p-3 md:flex-row md:items-center md:justify-between md:gap-3">
+      <div className="flex items-center gap-2 overflow-x-auto pb-1 [scrollbar-width:thin] md:flex-wrap md:overflow-visible md:pb-0 [&>button]:shrink-0 [&>div]:shrink-0">
         <button onClick={() => editor.chain().focus().toggleBold().run()} disabled={!editor.can().chain().focus().toggleBold().run()} className={`p-2 rounded hover:bg-gray-100 ${editor.isActive('bold') ? 'bg-gray-200' : ''}`}><Bold size={20} /></button>
         <button onClick={() => editor.chain().focus().toggleItalic().run()} className={`p-2 rounded hover:bg-gray-100 ${editor.isActive('italic') ? 'bg-gray-200' : ''}`}><Italic size={20} /></button>
         <button onClick={() => editor.chain().focus().toggleUnderline().run()} className={`p-2 rounded hover:bg-gray-100 ${editor.isActive('underline') ? 'bg-gray-200' : ''}`}><Underline size={20} /></button>
@@ -158,12 +157,11 @@ function EditorExtension({ editor, collaborationNode = null, onToggleComments, i
         >
           <MessageSquare size={20} />
         </button>
-        </div>
+      </div>
 
-        <div className="flex items-center gap-3">
-          {collaborationNode}
-          <div className="flex items-center">{renderSaveButton()}</div>
-        </div>
+      <div className="flex shrink-0 items-center justify-between gap-3 md:justify-end">
+        {collaborationNode}
+        <div className="flex items-center">{renderSaveButton()}</div>
       </div>
     </div>
   );
